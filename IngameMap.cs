@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using UnityEngine;
@@ -709,27 +710,27 @@ namespace Map
                                 }
                             }
                         }
-                        GUI.Box(new Rect(10, Screen.height - (height + 30f) - 10f, 200f, height + 35f), "Filter", GUI.skin.window);
+                        GUI.Box(new Rect(10, Screen.height - (height + 30f) - 40f, 200f, height + 35f), "Filter", GUI.skin.window);
                         int _y = 0;
                         int _x = 0;
                         foreach (MarkerCategory category in Categories.Values)
                         {
                             _x = 0;
                             string categoryName = category.Markers[0].Category;
-                            category.Selected = GUI.Toggle(new Rect(10, Screen.height - (height) - 10f + _y, 200f, 20f), category.Selected, categoryName, GUI.skin.button);
+                            category.Selected = GUI.Toggle(new Rect(10, Screen.height - (height) - 40f + _y, 200f, 20f), category.Selected, categoryName, GUI.skin.button);
                             _y += 20;
                             if (category.Selected)
                             {
                                 foreach (MarkerSetting setting in category.Markers)
                                 {
-                                    Rect nr = new Rect(10 + _x, Screen.height - (height) - 10f + _y, 100f, 20f);
+                                    Rect nr = new Rect(10 + _x, Screen.height - (height) - 40f + _y, 100f, 20f);
                                     GUI.color = new Color(category.Color.r, category.Color.g, category.Color.b, setting.Selected ? 0.2f : 0f);
                                     GUI.DrawTexture(nr, foreground);
                                     GUI.color = category.Color;
-                                    nr = new Rect(10 + _x, Screen.height - (height) - 10f + _y, 20f, 20f);
+                                    nr = new Rect(10 + _x, Screen.height - (height) - 40f + _y, 20f, 20f);
                                     GUI.DrawTextureWithTexCoords(nr, Markers, GetTextureCoords(setting.Texture));
                                     GUI.color = Color.white;
-                                    nr = new Rect(35 + _x, Screen.height - (height) - 10f + _y, 65f, 20f);
+                                    nr = new Rect(35 + _x, Screen.height - (height) - 40f + _y, 65f, 20f);
                                     setting.Selected = GUI.Toggle(nr, setting.Selected, setting.Label, GUI.skin.label);
                                     _x += 100;
                                     if (_x >= 200)
@@ -741,6 +742,11 @@ namespace Map
                                 if (_x == 100)
                                     _y += 20;
                             }
+                        }
+
+                        if (GUI.Button(new Rect(10f, Screen.height - 30f, 200f, 20f), "Save"))
+                        {
+                            SaveMarkers(Categories, "Mods/Map.settings");
                         }
 
                         if (Event.current.type == EventType.MouseDown)
@@ -817,6 +823,19 @@ namespace Map
             }
         }
 
+        public void SaveMarkers(Dictionary<string, MarkerCategory> Categories, string path)
+        {
+            INIHelper iniw = new INIHelper(path);
+
+            foreach (MarkerCategory category in Categories.Values)
+            {
+                foreach (MarkerSetting setting in category.Markers)
+                {
+                    iniw.Write("Map", setting.Label, setting.Selected.ToString());
+                }
+            }
+        }
+
         public float GetMarkerSize()
         {
             return 16f * Zoom;
@@ -843,6 +862,8 @@ namespace Map
         {
             try
             {
+                loadSettings();
+
                 Categories = new Dictionary<string, MarkerCategory>();
                 foreach (MarkerSetting setting in markerSettings.Values)
                 {
@@ -929,5 +950,30 @@ namespace Map
         }
 
         protected bool visible = false;
+
+        private void readIni(string path)
+        {
+            INIHelper inir = new INIHelper(path);
+
+            foreach (MarkerSetting setting in markerSettings.Values)
+            {
+                try
+                {
+                    setting.Selected = Convert.ToBoolean(inir.Read("Map", setting.Label));
+                }
+                catch (Exception e)
+                {
+                    setting.Selected = true;
+                }
+            }
+        }
+        private void loadSettings()
+        {
+            if (File.Exists("Mods/Map.settings"))
+            {
+                readIni("Mods/Map.settings");
+            }
+        }
+
     }
 }
