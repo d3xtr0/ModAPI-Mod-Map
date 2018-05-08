@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using TheForest.Items.Inventory;
+using TheForest.UI.Multiplayer;
 using UnityEngine;
 using TheForest.Utils;
 
@@ -30,8 +32,8 @@ namespace Map
             int y = Mathf.FloorToInt((float)index / 6f); 
             // int y = Mathf.FloorToInt((float)index / 6f);
             float ux = x / 6f;
-            float uy = 1f - (float)(y + 1) / 7f;
-            return new Rect(ux, uy, 1f / 6f, 1f / 7f);
+            float uy = 1f - (float)(y + 1) / 9f; //change last for rows
+            return new Rect(ux, uy, 1f / 6f, 1f / 9f); //change last for rows
             //return new Rect(ux, uy, 1f / 6f, 1f / 6f);
         }
 
@@ -142,7 +144,7 @@ namespace Map
             {"Paper", new MarkerSetting()
                 {
                     Label = "Picture",
-                    Texture = 11,
+                    Texture = 48,
                     Color = new Color(0.9f, 0.1f, 1f),
                     Category = "Collectibles"
                 }
@@ -150,7 +152,7 @@ namespace Map
             {"Magazine", new MarkerSetting()
                 {
                     Label = "Magazine",
-                    Texture = 11,
+                    Texture = 48,
                     Color = new Color(0.9f, 0.1f, 1f),
                     Category = "Collectibles"
                 }
@@ -158,7 +160,7 @@ namespace Map
             {"Cassette", new MarkerSetting()
                 {
                     Label = "Cassette",
-                    Texture = 11,
+                    Texture = 40,
                     Color = new Color(0.9f, 0.1f, 1f),
                     Category = "Collectibles"
                 }
@@ -166,7 +168,7 @@ namespace Map
             {"Camcorder", new MarkerSetting()
                 {
                     Label = "Camcorder",
-                    Texture = 11,
+                    Texture = 41,
                     Color = new Color(0.9f, 0.1f, 1f),
                     Category = "Collectibles"
                 }
@@ -174,7 +176,7 @@ namespace Map
             {"Tape", new MarkerSetting()
                 {
                     Label = "Tape",
-                    Texture = 11,
+                    Texture = 42,
                     Color = new Color(0.9f, 0.1f, 1f),
                     Category = "Collectibles"
                 }
@@ -182,7 +184,7 @@ namespace Map
             {"Toy", new MarkerSetting()
                 {
                     Label = "Toy",
-                    Texture = 11,
+                    Texture = 43,
                     Color = new Color(0.9f, 0.1f, 1f),
                     Category = "Collectibles"
                 }
@@ -190,7 +192,7 @@ namespace Map
             {"Map", new MarkerSetting()
                 {
                     Label = "Map",
-                    Texture = 11,
+                    Texture = 44,
                     Color = new Color(0.9f, 0.1f, 1f),
                     Category = "Collectibles"
                 }
@@ -198,7 +200,7 @@ namespace Map
             {"Compass", new MarkerSetting()
                 {
                     Label = "Compass",
-                    Texture = 11,
+                    Texture = 45,
                     Color = new Color(0.9f, 0.1f, 1f),
                     Category = "Collectibles"
                 }
@@ -206,7 +208,7 @@ namespace Map
             {"Pedometer", new MarkerSetting()
                 {
                     Label = "Pedometer",
-                    Texture = 11,
+                    Texture = 47,
                     Color = new Color(0.9f, 0.1f, 1f),
                     Category = "Collectibles"
                 }
@@ -214,7 +216,7 @@ namespace Map
             {"Fortune", new MarkerSetting()
                 {
                     Label = "Fortune",
-                    Texture = 11,
+                    Texture = 46,
                     Color = new Color(0.9f, 0.1f, 1f),
                     Category = "Collectibles"
                 }
@@ -403,6 +405,14 @@ namespace Map
                     Category = "Weapons"
                 }
             },
+            {"Bow", new MarkerSetting()
+                {
+                    Label = "Bow",
+                    Texture = 37,
+                    Color = new Color(1f, 0.6f, 0f),
+                    Category = "Weapons"
+                }
+            },
             {"Gun", new MarkerSetting()
                 {
                     Label = "Gun",
@@ -414,7 +424,15 @@ namespace Map
             {"Chainsaw", new MarkerSetting()
                 {
                     Label = "Chainsaw",
-                    Texture = 30,
+                    Texture = 38,
+                    Color = new Color(1f, 0.6f, 0f),
+                    Category = "Weapons"
+                }
+            },
+            {"Hairspray", new MarkerSetting()
+                {
+                    Label = "Hairspray",
+                    Texture = 39,
                     Color = new Color(1f, 0.6f, 0f),
                     Category = "Weapons"
                 }
@@ -444,7 +462,7 @@ namespace Map
                 }
             }
         };
-        protected bool Opened = false;
+        public static bool Opened = false;
         protected Map Overworld;
         protected Map Underworld;
 
@@ -912,20 +930,28 @@ namespace Map
 
         void Update()
         {
+            if (TheForest.Utils.Input.GetButtonDown("Esc"))
+            {
+                Opened = false;
+            }
+
             try
             {
                 Overworld.Update();
                 Underworld.Update();
                 if (ModAPI.Input.GetButtonDown("OpenMap"))
                 {
-                    if (TheForest.Utils.LocalPlayer.IsInCaves)
-                        currentMap = Underworld;
-                    else
-                        currentMap = Overworld;
-                    Opened = !Opened;
-                    ShowPhase = 0f;
-                    //Zoom = 1f;
-                    //Position = Vector2.zero;
+                    if (!ChatBox.IsChatOpen && LocalPlayer.Inventory.CurrentView != PlayerInventory.PlayerViews.Pause)
+                    {
+                        if (TheForest.Utils.LocalPlayer.IsInCaves)
+                            currentMap = Underworld;
+                        else
+                            currentMap = Overworld;
+                        Opened = !Opened;
+                        ShowPhase = 0f;
+                        //Zoom = 1f;
+                        //Position = Vector2.zero;
+                    }
                 }
                 if (Opened)
                 {
@@ -941,7 +967,7 @@ namespace Map
                     if (visible)
                         TheForest.Utils.LocalPlayer.FpCharacter.UnLockView();
                 }
-                this.visible = this.Opened;
+                this.visible = IngameMap.Opened;
             }
             catch (Exception e)
             {
@@ -975,5 +1001,27 @@ namespace Map
             }
         }
 
+    }
+
+    class PlayerInventoryOv : PlayerInventory
+    {
+        public override void TogglePauseMenu()
+        {
+            if (IngameMap.Opened)
+            {
+                return;
+            }
+            base.TogglePauseMenu();
+        }
+
+        public override void Attack()
+        {
+            if (this == LocalPlayer.Inventory && IngameMap.Opened)
+            {
+                return;
+            }
+
+            base.Attack();
+        }
     }
 }
