@@ -4,7 +4,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using TheForest.Items;
 using TheForest.Items.Inventory;
+using TheForest.Items.World;
 using TheForest.UI.Multiplayer;
 using UnityEngine;
 using TheForest.Utils;
@@ -472,6 +474,7 @@ namespace Map
         protected Vector2 Position = Vector2.zero;
         protected float Zoom = 1f;
         protected int texNum = 31;
+        public static bool livemarkers = true;
 
         [ModAPI.Attributes.ExecuteOnGameStart]
         public static void Init()
@@ -619,68 +622,72 @@ namespace Map
                             }
                         }
 
-                        List<GameObject> allMutants;
-                        if (TheForest.Utils.LocalPlayer.IsInCaves)
+                        if (livemarkers)
                         {
-                            allMutants = new List<GameObject>(Scene.MutantControler.activeCaveCannibals);
-                            foreach (GameObject current in Scene.MutantControler.activeInstantSpawnedCannibals)
+                            List<GameObject> allMutants;
+                            if (TheForest.Utils.LocalPlayer.IsInCaves)
                             {
-                                if (!allMutants.Contains(current))
+                                allMutants = new List<GameObject>(Scene.MutantControler.activeCaveCannibals);
+                                foreach (GameObject current in Scene.MutantControler.activeInstantSpawnedCannibals)
                                 {
-                                    allMutants.Add(current);
-                                }
-                            }
-                            allMutants.RemoveAll((GameObject o) => o == null);
-                            allMutants.RemoveAll((GameObject o) => o != o.activeSelf);
-                        }
-                        else
-                        {
-                            allMutants = new List<GameObject>(Scene.MutantControler.activeWorldCannibals);
-                            foreach (GameObject current in Scene.MutantControler.activeInstantSpawnedCannibals)
-                            {
-                                if (!allMutants.Contains(current))
-                                {
-                                    allMutants.Add(current);
-                                }
-                            }
-                            allMutants.RemoveAll((GameObject o) => o == null);
-                            allMutants.RemoveAll((GameObject o) => o != o.activeSelf);
-                        }
-
-                        if (allMutants.Count > 0)
-                        {
-                            foreach (GameObject mutant in allMutants)
-                            {
-                                if (mutant != null)
-                                {
-                                    mutantMarker = new Map.Marker()
+                                    if (!allMutants.Contains(current))
                                     {
-                                        Class = new MarkerSetting()
+                                        allMutants.Add(current);
+                                    }
+                                }
+                                allMutants.RemoveAll((GameObject o) => o == null);
+                                allMutants.RemoveAll((GameObject o) => o != o.activeSelf);
+                            }
+                            else
+                            {
+                                allMutants = new List<GameObject>(Scene.MutantControler.activeWorldCannibals);
+                                foreach (GameObject current in Scene.MutantControler.activeInstantSpawnedCannibals)
+                                {
+                                    if (!allMutants.Contains(current))
+                                    {
+                                        allMutants.Add(current);
+                                    }
+                                }
+                                allMutants.RemoveAll((GameObject o) => o == null);
+                                allMutants.RemoveAll((GameObject o) => o != o.activeSelf);
+                            }
+
+                            if (allMutants.Count > 0)
+                            {
+                                foreach (GameObject mutant in allMutants)
+                                {
+                                    if (mutant != null)
+                                    {
+                                        mutantMarker = new Map.Marker()
                                         {
-                                            ID = "Live Cannibal",
-                                            Color = Color.red,
-                                            Label = "Cannibal",
-                                            Texture = 36,
-                                            Category = "Natives"
-                                        },
-                                        Description = "Cannibal",
-                                        WorldPosition = Vector3.zero,
-                                    };
-                                    mutantMarker.WorldPosition.x = -mutant.transform.position.z;
-                                    mutantMarker.WorldPosition.y = mutant.transform.position.y;
-                                    mutantMarker.WorldPosition.z = mutant.transform.position.x;
+                                            Class = new MarkerSetting()
+                                            {
+                                                ID = "Live Cannibal",
+                                                Color = Color.red,
+                                                Label = "Cannibal",
+                                                Texture = 36,
+                                                Category = "Natives"
+                                            },
+                                            Description = "Cannibal",
+                                            WorldPosition = Vector3.zero,
+                                        };
+                                        mutantMarker.WorldPosition.x = -mutant.transform.position.z;
+                                        mutantMarker.WorldPosition.y = mutant.transform.position.y;
+                                        mutantMarker.WorldPosition.z = mutant.transform.position.x;
 
-                                    float rot = mutant.GetComponentInChildren<Animator>().rootRotation.eulerAngles.y;
+                                        float rot = mutant.GetComponentInChildren<Animator>().rootRotation.eulerAngles
+                                            .y;
 
-                                    if (DrawMarker(mutantMarker, 90f + rot, 2f))
-                                    {
-                                        tooltip.Add(mutantMarker);
+                                        if (DrawMarker(mutantMarker, 90f + rot, 2f))
+                                        {
+                                            tooltip.Add(mutantMarker);
+                                        }
                                     }
                                 }
                             }
                         }
-                        
-                        
+
+
 
                         if (tooltip.Count > 0)
                         {
@@ -728,27 +735,28 @@ namespace Map
                                 }
                             }
                         }
-                        GUI.Box(new Rect(10, Screen.height - (height + 30f) - 40f, 200f, height + 35f), "Filter", GUI.skin.window);
+                        float offset = 70f;
+                        GUI.Box(new Rect(10, Screen.height - (height + 30f) - offset, 200f, height + 35f), "Filter", GUI.skin.window);
                         int _y = 0;
                         int _x = 0;
                         foreach (MarkerCategory category in Categories.Values)
                         {
                             _x = 0;
                             string categoryName = category.Markers[0].Category;
-                            category.Selected = GUI.Toggle(new Rect(10, Screen.height - (height) - 40f + _y, 200f, 20f), category.Selected, categoryName, GUI.skin.button);
+                            category.Selected = GUI.Toggle(new Rect(10, Screen.height - (height) - offset + _y, 200f, 20f), category.Selected, categoryName, GUI.skin.button);
                             _y += 20;
                             if (category.Selected)
                             {
                                 foreach (MarkerSetting setting in category.Markers)
                                 {
-                                    Rect nr = new Rect(10 + _x, Screen.height - (height) - 40f + _y, 100f, 20f);
+                                    Rect nr = new Rect(10 + _x, Screen.height - (height) - offset + _y, 100f, 20f);
                                     GUI.color = new Color(category.Color.r, category.Color.g, category.Color.b, setting.Selected ? 0.2f : 0f);
                                     GUI.DrawTexture(nr, foreground);
                                     GUI.color = category.Color;
-                                    nr = new Rect(10 + _x, Screen.height - (height) - 40f + _y, 20f, 20f);
+                                    nr = new Rect(10 + _x, Screen.height - (height) - offset + _y, 20f, 20f);
                                     GUI.DrawTextureWithTexCoords(nr, Markers, GetTextureCoords(setting.Texture));
                                     GUI.color = Color.white;
-                                    nr = new Rect(35 + _x, Screen.height - (height) - 40f + _y, 65f, 20f);
+                                    nr = new Rect(35 + _x, Screen.height - (height) - offset + _y, 65f, 20f);
                                     setting.Selected = GUI.Toggle(nr, setting.Selected, setting.Label, GUI.skin.label);
                                     _x += 100;
                                     if (_x >= 200)
@@ -761,6 +769,10 @@ namespace Map
                                     _y += 20;
                             }
                         }
+
+                        GUI.Label(new Rect(40f, Screen.height - 60f, 200f, 20f), "Live Cannibals", GUI.skin.label);
+                        livemarkers = UnityEngine.GUI.Toggle(new Rect(10f, Screen.height - 60f, 20f, 30f), livemarkers, "");
+
 
                         if (GUI.Button(new Rect(10f, Screen.height - 30f, 200f, 20f), "Save"))
                         {
@@ -852,6 +864,8 @@ namespace Map
                     iniw.Write("Map", setting.Label, setting.Selected.ToString());
                 }
             }
+
+            iniw.Write("Map", "LiveMarkers", livemarkers.ToString());
         }
 
         public float GetMarkerSize()
@@ -951,6 +965,18 @@ namespace Map
                         ShowPhase = 0f;
                         //Zoom = 1f;
                         //Position = Vector2.zero;
+                        if (Opened)
+                        {
+                            if (!LocalPlayer.Inventory.IsRightHandEmpty())
+                            {
+                                if (!LocalPlayer.Inventory.RightHand.IsHeldOnly)
+                                {
+                                    LocalPlayer.Inventory.MemorizeItem(Item.EquipmentSlot.RightHand);
+                                }
+                                LocalPlayer.Inventory.StashEquipedWeapon(false);
+                            }
+                            LocalPlayer.Inventory.StashLeftHand();
+                        }
                     }
                 }
                 if (Opened)
@@ -992,6 +1018,15 @@ namespace Map
                     setting.Selected = true;
                 }
             }
+
+            try
+            {
+                livemarkers = Convert.ToBoolean(inir.Read("Map", "LiveMarkers"));
+            }
+            catch (Exception e)
+            {
+                livemarkers = true;
+            }
         }
         private void loadSettings()
         {
@@ -1012,16 +1047,6 @@ namespace Map
                 return;
             }
             base.TogglePauseMenu();
-        }
-
-        public override void Attack()
-        {
-            if (this == LocalPlayer.Inventory && IngameMap.Opened)
-            {
-                return;
-            }
-
-            base.Attack();
         }
     }
 }
