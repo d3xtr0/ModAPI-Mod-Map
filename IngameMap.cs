@@ -306,7 +306,7 @@ namespace Map
             {"Mutant", new MarkerSetting()
                 {
                     Label = "Mutant",
-                    Texture = 35,
+                    Texture = 49,
                     Color = Color.red,
                     Category = "Natives"
                 }
@@ -519,7 +519,7 @@ namespace Map
         {
             try
             {
-                GUI.skin = ModAPI.Gui.Skin;
+                GUI.skin = ModAPI.Interface.Skin;
                 GUI.color = Color.white;
                 if (Opened)
                 {
@@ -925,7 +925,7 @@ namespace Map
                 foreground.filterMode = FilterMode.Point;
                 foreground.Apply();
 
-                WhiteLabel = new GUIStyle(ModAPI.Gui.Skin.label);
+                WhiteLabel = new GUIStyle(ModAPI.Interface.Skin.label);
                 WhiteLabel.normal.textColor = Color.white;
 
                 Overworld = new Map("https://theforestmap.com/map/map-4096.jpg", "https://theforestmap.com/map/md5.php?map=forest", "https://theforestmap.com/inc/api/?json&map=forest", "Mods/Map/Cache/Overworld/map.jpg");
