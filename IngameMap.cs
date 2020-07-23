@@ -486,7 +486,7 @@ namespace Map
         public bool DrawMarker(Map.Marker marker, float angle = 0f, float scale = 1f)
         {
             Vector2 center = new Vector2(Screen.width / 2f, Screen.height / 2f) + Position * Zoom;
-            Vector2 wholeSize = new Vector2(Screen.width, Screen.height) * Zoom;
+            Vector2 wholeSize = new Vector2(Screen.height * 1.777778f, Screen.height) * Zoom;
             Vector2 mapPos = WorldToMap(marker.WorldPosition);
             mapPos.x *= wholeSize.x;
             mapPos.y *= wholeSize.y;
@@ -527,7 +527,7 @@ namespace Map
 
                     if (currentMap.Textures != null && currentMap.Textures.Length > 0)
                     {
-                        Vector2 wholeSize = new Vector2(Screen.width, Screen.height) * Zoom;
+                        Vector2 wholeSize = new Vector2(Screen.height * 1.777778f, Screen.height) * Zoom;
                         if (wholeSize.x < wholeSize.y)
                             wholeSize.y = wholeSize.x;
                         else
@@ -928,8 +928,8 @@ namespace Map
                 WhiteLabel = new GUIStyle(ModAPI.Interface.Skin.label);
                 WhiteLabel.normal.textColor = Color.white;
 
-                Overworld = new Map("https://theforestmap.com/map/map-4096.jpg", "https://theforestmap.com/map/md5.php?map=forest", "https://theforestmap.com/inc/api/?json&map=forest", "Mods/Map/Cache/Overworld/map.jpg");
-                Underworld = new Map("https://theforestmap.com/map/cave-4096.jpg", "https://theforestmap.com/map/md5.php?map=cave", "https://theforestmap.com/inc/api/?json&map=cave", "Mods/Map/Cache/Underworld/map.jpg");
+                Overworld = new Map("http://theforestmap.com/map/map-4096.jpg", "http://theforestmap.com/map/md5.php?map=forest", "http://theforestmap.com/inc/api/?json&map=forest", "Mods/Map/Cache/Overworld/map.jpg");
+                Underworld = new Map("http://theforestmap.com/map/cave-4096.jpg", "http://theforestmap.com/map/md5.php?map=cave", "http://theforestmap.com/inc/api/?json&map=cave", "Mods/Map/Cache/Underworld/map.jpg");
             }
             catch (Exception e)
             {
@@ -941,12 +941,27 @@ namespace Map
         protected bool underworldParsed = false;
         protected Texture2D overworldTexture;
         protected Texture2D underworldTexture;
+        private bool ShouldEquipLeftHandAfter;
+        private bool ShouldEquipRightHandAfter;
+
+        private void RestoreEquipement()
+        {
+            if (this.ShouldEquipLeftHandAfter)
+            {
+                LocalPlayer.Inventory.EquipPreviousUtility(false);
+            }
+            if (this.ShouldEquipRightHandAfter)
+            {
+                LocalPlayer.Inventory.EquipPreviousWeaponDelayed();
+            }
+        }
 
         void Update()
         {
             if (TheForest.Utils.Input.GetButtonDown("Esc"))
             {
                 Opened = false;
+                RestoreEquipement();
             }
 
             try
@@ -965,8 +980,12 @@ namespace Map
                         ShowPhase = 0f;
                         //Zoom = 1f;
                         //Position = Vector2.zero;
+                        
                         if (Opened)
                         {
+                            ShouldEquipLeftHandAfter = !LocalPlayer.Inventory.IsLeftHandEmpty();
+                            ShouldEquipRightHandAfter = !LocalPlayer.Inventory.IsRightHandEmpty();
+
                             if (!LocalPlayer.Inventory.IsRightHandEmpty())
                             {
                                 if (!LocalPlayer.Inventory.RightHand.IsHeldOnly)
@@ -975,7 +994,15 @@ namespace Map
                                 }
                                 LocalPlayer.Inventory.StashEquipedWeapon(false);
                             }
-                            LocalPlayer.Inventory.StashLeftHand();
+                            if (!LocalPlayer.Inventory.IsLeftHandEmpty())
+                            {
+                                LocalPlayer.Inventory.MemorizeItem(Item.EquipmentSlot.LeftHand);
+                                LocalPlayer.Inventory.StashLeftHand();
+                            }
+                        }
+                        else
+                        {
+                            RestoreEquipement();
                         }
                     }
                 }

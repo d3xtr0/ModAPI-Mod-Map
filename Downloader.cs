@@ -47,6 +47,7 @@ namespace Map
             catch (Exception e)
             {
                 Error = e.ToString();
+                ModAPI.Log.Write(Error);
             }
         }
 
