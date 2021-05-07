@@ -625,31 +625,40 @@ namespace Map
                         if (livemarkers)
                         {
                             List<GameObject> allMutants;
-                            if (TheForest.Utils.LocalPlayer.IsInCaves)
+                            if (GameSetup.IsMpClient)
                             {
-                                allMutants = new List<GameObject>(Scene.MutantControler.activeCaveCannibals);
-                                foreach (GameObject current in Scene.MutantControler.activeInstantSpawnedCannibals)
-                                {
-                                    if (!allMutants.Contains(current))
-                                    {
-                                        allMutants.Add(current);
-                                    }
-                                }
+                                allMutants = FindObjectsOfType<enemyWeaponMelee>().Select(x => x.gameObject).ToList();
                                 allMutants.RemoveAll((GameObject o) => o == null);
                                 allMutants.RemoveAll((GameObject o) => o != o.activeSelf);
                             }
                             else
                             {
-                                allMutants = new List<GameObject>(Scene.MutantControler.activeWorldCannibals);
-                                foreach (GameObject current in Scene.MutantControler.activeInstantSpawnedCannibals)
+                                if (TheForest.Utils.LocalPlayer.IsInCaves)
                                 {
-                                    if (!allMutants.Contains(current))
+                                    allMutants = new List<GameObject>(Scene.MutantControler.activeCaveCannibals);
+                                    foreach (GameObject current in Scene.MutantControler.activeInstantSpawnedCannibals)
                                     {
-                                        allMutants.Add(current);
+                                        if (!allMutants.Contains(current))
+                                        {
+                                            allMutants.Add(current);
+                                        }
                                     }
+                                    allMutants.RemoveAll((GameObject o) => o == null);
+                                    allMutants.RemoveAll((GameObject o) => o != o.activeSelf);
                                 }
-                                allMutants.RemoveAll((GameObject o) => o == null);
-                                allMutants.RemoveAll((GameObject o) => o != o.activeSelf);
+                                else
+                                {
+                                    allMutants = new List<GameObject>(Scene.MutantControler.activeWorldCannibals);
+                                    foreach (GameObject current in Scene.MutantControler.activeInstantSpawnedCannibals)
+                                    {
+                                        if (!allMutants.Contains(current))
+                                        {
+                                            allMutants.Add(current);
+                                        }
+                                    }
+                                    allMutants.RemoveAll((GameObject o) => o == null);
+                                    allMutants.RemoveAll((GameObject o) => o != o.activeSelf);
+                                }
                             }
 
                             if (allMutants.Count > 0)
