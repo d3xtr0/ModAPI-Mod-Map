@@ -627,9 +627,7 @@ namespace Map
                             List<GameObject> allMutants;
                             if (GameSetup.IsMpClient)
                             {
-                                allMutants = FindObjectsOfType<enemyWeaponMelee>().Select(x => x.gameObject).ToList();
-                                allMutants.RemoveAll((GameObject o) => o == null);
-                                allMutants.RemoveAll((GameObject o) => o != o.activeSelf);
+                                allMutants = LiveEnemyForClients.liveEnemies;
                             }
                             else
                             {

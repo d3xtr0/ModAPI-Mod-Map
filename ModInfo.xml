@@ -1,5 +1,5 @@
 <Mod ID="Map">
-  <Compatible>1.10b</Compatible>
+  <Compatible>1.11b</Compatible>
   <Button Standard="M" ID="OpenMap">
     <Name>
       <EN>Open map</EN>
@@ -18,5 +18,5 @@
     <EN>An ingame map</EN>
     <DE>Eine Karte</DE>
   </Description>
-  <Version>1.7</Version>
+  <Version>1.8.1</Version>
 </Mod>
